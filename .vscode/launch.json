@@ -11,7 +11,7 @@
             "program": "${file}",
             "console": "integratedTerminal",
             "justMyCode": true,
-            "args": ["/comun/links/mondongo/fichero1.txt"]
+            "args": [".mio/entrada.txt",".mio/salida.txt"]
         }
     ]
 }
