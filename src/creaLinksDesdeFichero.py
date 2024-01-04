@@ -10,6 +10,7 @@
 #=========================================================================
 
 from __future__ import print_function;
+from pathlib import PurePath
 import requests;
 import json;
 import traceback;
@@ -70,7 +71,18 @@ def main():
     if (fileSalida == ""):
         eprint ("ERROR: Uso: " + sys.argv[0] + " <path/ficheroOrigen> <path/ficheroSalida> [--debug]");
         return SyntaxError;
-
+    
+    #Genero el nombre del fichero de error. Igual que el de salida pero añadiendo _error antes de la extension
+    q=PurePath(fileSalida)
+    dir=''
+    if(len(q.parts)>1): 
+        dir=q.parts[0] + '/'
+    file=q.parts[1]
+    
+    x = file.partition(".")
+    fileSalidaError=dir + x[0]+"_error"+x[1]+x[2]
+    #Fin nombre del fichero de error
+    
     fileEntrada = "";
     if (len (sys.argv) >= NUMERO_ARGUMENTOS-2): fileEntrada = sys.argv[NUMERO_ARGUMENTOS-3];
 
@@ -85,23 +97,9 @@ def main():
 
     archivoEntrada = open(fileEntrada, "r", encoding="utf-8")
     archivoSalida = open(fileSalida, "w", encoding="utf-8")
-
+    archivoSalidaError = open(fileSalidaError, "w", encoding="utf-8")
+    
     DoAuth (Account, Passwd);
-
-    """
-    list = SharingList();
-
-    links = list["data"]["links"];
-    total = list["data"]["total"];
-
-    for (link) in (links):
-        if (link["path"] == file):
-            url = _(link["url"], "url");
-
-            eprint ("EXISTS:", url);
-            print (url);
-            return LinkExists;
-    """
     
     for linea in archivoEntrada:
         url  = "";
@@ -114,13 +112,15 @@ def main():
 
             archivoSalida.write(f"\"{linea}\";\"{url}\"\n")
             
-            eprint ("CREATED:", url);
+            eprint ("Creado enlace", url, " para ", linea);
 
         else:
+            archivoSalidaError.write(f"\"{linea}\"\n")
             eprint ("No se ha creado el enlace para ", '"' + linea + '"');
 
     archivoEntrada.close();
     archivoSalida.close();
+    archivoSalidaError.close();
     
     return;
 #=========================================================================
@@ -251,7 +251,7 @@ except Exception as e:
 
     eprint ("ERROR: " + str (e));
     if (Debug): eprint ("\n" + traceback.format_exc());
-    sys.exit (FatalError);
+    #sys.exit (FatalError);
 
 #=========================================================================
 
